@@ -28,8 +28,10 @@ git remote add origin https://github.com/<你的用户名>/castle-battle.git
 git push -u origin main
 ```
 
-3. 打开仓库 **Settings → Pages**，Source 选择 **GitHub Actions**
-4. 推送后 Actions 会自动部署，约 1–2 分钟可访问
+3. 打开仓库 **Settings → Pages**
+4. **Build and deployment** 中 Source 选 **Deploy from a branch**
+5. Branch 选 **main**，文件夹选 **/ (root)**，保存
+6. 约 1–2 分钟后访问：`https://<你的用户名>.github.io/castle-battle/`
 
 ## 项目结构
 
