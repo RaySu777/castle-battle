@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>城堡大战</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 主菜单 -->
+    <div id="menu-screen" class="screen active">
+      <div class="menu-content">
+        <h1 class="game-title">🏰 城堡大战</h1>
+        <p class="subtitle">征服敌方城堡，执掌万界轮回！</p>
+        <button class="btn btn-primary" id="btn-start">开始征战</button>
+        <button class="btn btn-secondary" id="btn-level-select">选择关卡</button>
+        <div class="menu-stats">
+          <span>已通关: <strong id="menu-cleared">0</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 关卡选择 -->
+    <div id="level-screen" class="screen">
+      <h2>选择关卡</h2>
+      <div id="level-grid" class="level-grid"></div>
+      <button class="btn btn-secondary" id="btn-back-menu">返回主菜单</button>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="game-screen" class="screen">
+      <div class="hud">
+        <div class="hud-left">
+          <span class="level-badge">第 <span id="current-level">1</span> 关</span>
+          <span class="gold-display">💰 <span id="gold">100</span></span>
+        </div>
+        <div class="hud-center">
+          <span id="level-name">新手村</span>
+        </div>
+        <div class="hud-right">
+          <button class="btn btn-small" id="btn-pause">暂停</button>
+          <button class="btn btn-small" id="btn-quit">退出</button>
+        </div>
+      </div>
+
+      <canvas id="game-canvas"></canvas>
+
+      <div class="unit-bar">
+        <button class="unit-btn" data-unit="warrior" title="战士 - 近战肉盾">
+          <span class="unit-icon">⚔️</span>
+          <span class="unit-name">战士</span>
+          <span class="unit-cost">30</span>
+        </button>
+        <button class="unit-btn" data-unit="archer" title="弓箭手 - 远程输出">
+          <span class="unit-icon">🏹</span>
+          <span class="unit-name">弓箭手</span>
+          <span class="unit-cost">50</span>
+        </button>
+        <button class="unit-btn" data-unit="knight" title="骑士 - 高攻高速">
+          <span class="unit-icon">🐴</span>
+          <span class="unit-name">骑士</span>
+          <span class="unit-cost">80</span>
+        </button>
+        <button class="unit-btn" data-unit="catapult" title="投石车 - 攻城利器">
+          <span class="unit-icon">🪨</span>
+          <span class="unit-name">投石车</span>
+          <span class="unit-cost">120</span>
+        </button>
+        <button class="unit-btn" data-unit="mage" title="法师 - 范围伤害">
+          <span class="unit-icon">🔮</span>
+          <span class="unit-name">法师</span>
+          <span class="unit-cost">100</span>
+        </button>
+      </div>
+
+      <div class="castle-hp-bar">
+        <div class="hp-section player-hp">
+          <span>我方城堡</span>
+          <div class="hp-bar"><div class="hp-fill player-fill" id="player-castle-hp"></div></div>
+          <span id="player-hp-text">1000/1000</span>
+        </div>
+        <div class="hp-section enemy-hp">
+          <span>敌方城堡</span>
+          <div class="hp-bar"><div class="hp-fill enemy-fill" id="enemy-castle-hp"></div></div>
+          <span id="enemy-hp-text">800/800</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 胜利/失败弹窗 -->
+    <div id="result-overlay" class="overlay hidden">
+      <div class="result-card">
+        <h2 id="result-title">胜利！</h2>
+        <p id="result-message">敌方城堡已被攻陷！</p>
+        <div class="result-buttons">
+          <button class="btn btn-primary" id="btn-next-level">下一关</button>
+          <button class="btn btn-secondary" id="btn-retry">重试</button>
+          <button class="btn btn-secondary" id="btn-result-menu">主菜单</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 暂停弹窗 -->
+    <div id="pause-overlay" class="overlay hidden">
+      <div class="result-card">
+        <h2>游戏暂停</h2>
+        <div class="result-buttons">
+          <button class="btn btn-primary" id="btn-resume">继续游戏</button>
+          <button class="btn btn-secondary" id="btn-pause-quit">退出关卡</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/levels.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
