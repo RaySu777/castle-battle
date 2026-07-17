@@ -50,6 +50,32 @@ const UNIT_TYPES = {
     projectile: true,
     siege: true
   },
+  speedCatapult: {
+    name: '速度投石车',
+    cost: 150,
+    hp: 90,
+    attack: 55,
+    speed: 1.2,
+    range: 250,
+    attackSpeed: 0.45,
+    color: '#f39c12',
+    size: 17,
+    icon: '💨',
+    projectile: true,
+    siege: true
+  },
+  holyKnight: {
+    name: '圣骑士',
+    cost: 120,
+    hp: 320,
+    attack: 45,
+    speed: 1.8,
+    range: 35,
+    attackSpeed: 0.65,
+    color: '#ffd700',
+    size: 17,
+    icon: '🛡️'
+  },
   mage: {
     name: '法师',
     cost: 100,
@@ -1443,9 +1469,9 @@ const LEVELS = [
     startGold: 13,
     goldRate: 24,
     enemyGoldRate: 63,
-    enemyUnits: ['archer', 'archer', 'knight', 'mage', 'catapult'],
+    enemyUnits: ['archer', 'archer', 'knight', 'holyKnight', 'mage', 'catapult', 'speedCatapult'],
     enemySpawnInterval: 892,
-    description: '生死簿堂弓箭手齐射，需快速撕开缺口。'
+    description: '生死簿堂圣骑士与速度投石车登场，需快速撕开缺口。'
   },
   {
     id: 116,

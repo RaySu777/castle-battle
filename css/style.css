@@ -60,6 +60,10 @@ body {
   margin-top: 2rem;
   font-size: 1rem;
   color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .menu-stats strong {
@@ -169,6 +173,135 @@ body {
 .level-btn.current {
   border-color: #ffd700;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* 关卡记录 */
+#records-screen.active {
+  justify-content: flex-start;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+
+#records-screen h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.records-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  margin-bottom: 1.5rem;
+}
+
+.summary-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-item span {
+  font-size: 0.85rem;
+  color: #a0a0b0;
+}
+
+.summary-item strong {
+  font-size: 1.15rem;
+  color: #ffd700;
+}
+
+.records-list {
+  width: 100%;
+  max-width: 520px;
+  max-height: 50vh;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.record-row {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.2s;
+}
+
+.record-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.record-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.record-level {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #e8e8e8;
+}
+
+.record-name {
+  font-size: 0.85rem;
+  color: #a0a0b0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.record-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.record-stars {
+  font-size: 0.85rem;
+  color: #666;
+  letter-spacing: 1px;
+}
+
+.record-stars.has-stars {
+  color: #ffd700;
+}
+
+.record-time {
+  font-size: 0.8rem;
+  color: #87ceeb;
+}
+
+.record-attempts {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.records-empty {
+  color: #888;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* 游戏界面 */
@@ -348,6 +481,45 @@ body {
   margin-bottom: 24px;
 }
 
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.result-stat {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.result-stat span {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.result-stat strong {
+  font-size: 1rem;
+  color: #ffd700;
+}
+
+.record-badge {
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 .result-buttons {
   display: flex;
   flex-direction: column;
@@ -370,4 +542,8 @@ body {
   .level-btn { width: 65px; height: 65px; font-size: 1rem; }
   .unit-bar { flex-wrap: wrap; }
   .unit-btn { min-width: 60px; padding: 6px 8px; }
+  .records-summary { grid-template-columns: 1fr; }
+  .record-row { flex-direction: column; align-items: flex-start; }
+  .record-meta { align-items: flex-start; text-align: left; }
+  .result-stats { grid-template-columns: 1fr; }
 }

@@ -15,8 +15,10 @@
         <p class="subtitle">征服敌方城堡，执掌万界轮回！</p>
         <button class="btn btn-primary" id="btn-start">开始征战</button>
         <button class="btn btn-secondary" id="btn-level-select">选择关卡</button>
+        <button class="btn btn-secondary" id="btn-records">关卡记录</button>
         <div class="menu-stats">
           <span>已通关: <strong id="menu-cleared">0</strong></span>
+          <span>总挑战: <strong id="menu-attempts">0</strong> 次</span>
         </div>
       </div>
     </div>
@@ -26,6 +28,15 @@
       <h2>选择关卡</h2>
       <div id="level-grid" class="level-grid"></div>
       <button class="btn btn-secondary" id="btn-back-menu">返回主菜单</button>
+    </div>
+
+    <!-- 关卡记录 -->
+    <div id="records-screen" class="screen">
+      <h2>关卡记录</h2>
+      <div class="records-summary" id="records-summary"></div>
+      <div class="records-list" id="records-list"></div>
+      <p class="records-empty hidden" id="records-empty">还没有挑战记录，快去开始征战吧！</p>
+      <button class="btn btn-secondary" id="btn-back-from-records">返回主菜单</button>
     </div>
 
     <!-- 游戏界面 -->
@@ -72,6 +83,16 @@
           <span class="unit-name">法师</span>
           <span class="unit-cost">100</span>
         </button>
+        <button class="unit-btn hidden" data-unit="holyKnight" title="圣骑士 - 第115关解锁，高血高攻">
+          <span class="unit-icon">🛡️</span>
+          <span class="unit-name">圣骑士</span>
+          <span class="unit-cost">120</span>
+        </button>
+        <button class="unit-btn hidden" data-unit="speedCatapult" title="速度投石车 - 第115关解锁，移动更快">
+          <span class="unit-icon">💨</span>
+          <span class="unit-name">速度投石车</span>
+          <span class="unit-cost">150</span>
+        </button>
       </div>
 
       <div class="castle-hp-bar">
@@ -93,6 +114,12 @@
       <div class="result-card">
         <h2 id="result-title">胜利！</h2>
         <p id="result-message">敌方城堡已被攻陷！</p>
+        <div id="result-stats" class="result-stats hidden">
+          <div class="result-stat"><span>用时</span><strong id="result-time">--</strong></div>
+          <div class="result-stat"><span>城堡剩余</span><strong id="result-hp">--</strong></div>
+          <div class="result-stat"><span>评级</span><strong id="result-stars">--</strong></div>
+        </div>
+        <p id="result-record-badge" class="record-badge hidden">🏆 新纪录！</p>
         <div class="result-buttons">
           <button class="btn btn-primary" id="btn-next-level">下一关</button>
           <button class="btn btn-secondary" id="btn-retry">重试</button>
@@ -114,6 +141,7 @@
   </div>
 
   <script src="js/levels.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

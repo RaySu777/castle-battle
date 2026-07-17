@@ -2,19 +2,81 @@
   'use strict';
 
   const SAVE_KEY = 'castle_battle_save';
-  const PLAYER_GOLD_RATE = 30;
+  const PLAYER_GOLD_BASE = 20;
+  const GOLD_BONUS_STEP = 5;
+  const GOLD_BONUS_INTERVAL = 15;
+  const PLAYER_GOLD_FLAT_UNTIL = 20;
+  const SPEED_CATAPULT_UNLOCK = 115;
+  const HOLY_KNIGHT_UNLOCK = 115;
+
+  function getPlayerGoldRate(levelId) {
+    if (levelId <= PLAYER_GOLD_FLAT_UNTIL) return PLAYER_GOLD_BASE;
+    const tier = Math.floor((levelId - PLAYER_GOLD_FLAT_UNTIL - 1) / GOLD_BONUS_INTERVAL) + 1;
+    return PLAYER_GOLD_BASE + tier * GOLD_BONUS_STEP;
+  }
+
+  function isUnitUnlocked(type, levelId) {
+    if (type === 'speedCatapult') return levelId >= SPEED_CATAPULT_UNLOCK;
+    if (type === 'holyKnight') return levelId >= HOLY_KNIGHT_UNLOCK;
+    return true;
+  }
 
   // --- 存档 ---
+  function normalizeSave(raw) {
+    const save = raw || {};
+    save.cleared = Array.isArray(save.cleared) ? save.cleared : [];
+    save.maxLevel = save.maxLevel || 1;
+    save.records = save.records && typeof save.records === 'object' ? save.records : {};
+    save.stats = save.stats || { totalWins: 0, totalAttempts: 0, totalLosses: 0, totalPlayTime: 0 };
+    return save;
+  }
+
   function loadSave() {
     try {
-      return JSON.parse(localStorage.getItem(SAVE_KEY)) || { cleared: [], maxLevel: 1 };
+      return normalizeSave(JSON.parse(localStorage.getItem(SAVE_KEY)));
     } catch {
-      return { cleared: [], maxLevel: 1 };
+      return normalizeSave(null);
     }
   }
 
   function persistSave(save) {
     localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+  }
+
+  function getLevelRecord(save, levelId) {
+    const key = String(levelId);
+    if (!save.records[key]) {
+      save.records[key] = {
+        attempts: 0,
+        wins: 0,
+        losses: 0,
+        bestTime: null,
+        bestStars: 0,
+        bestCastleHpPct: 0,
+        lastPlayed: null
+      };
+    }
+    return save.records[key];
+  }
+
+  function calcStars(castleHp, maxHp) {
+    const pct = maxHp > 0 ? castleHp / maxHp : 0;
+    if (pct >= 0.8) return 3;
+    if (pct >= 0.5) return 2;
+    return 1;
+  }
+
+  function starsText(count) {
+    if (!count) return '—';
+    return '★'.repeat(count) + '☆'.repeat(3 - count);
+  }
+
+  function formatTime(seconds) {
+    if (seconds == null || !Number.isFinite(seconds)) return '—';
+    const total = Math.floor(seconds);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return m > 0 ? `${m}分${String(s).padStart(2, '0')}秒` : `${s}秒`;
   }
 
   function recordLevelVisit(levelId) {
@@ -33,10 +95,64 @@
     persistSave(save);
   }
 
+  function recordLevelAttempt(levelId) {
+    const save = loadSave();
+    const record = getLevelRecord(save, levelId);
+    record.attempts += 1;
+    record.lastPlayed = Date.now();
+    save.stats.totalAttempts += 1;
+    persistSave(save);
+  }
+
+  function recordLevelResult(levelId, won, gs) {
+    const save = loadSave();
+    const record = getLevelRecord(save, levelId);
+    save.stats.totalPlayTime += gs.time;
+
+    if (won) {
+      record.wins += 1;
+      save.stats.totalWins += 1;
+
+      const castleHpPct = gs.playerCastleMaxHp > 0
+        ? gs.playerCastleHp / gs.playerCastleMaxHp
+        : 0;
+      const stars = calcStars(gs.playerCastleHp, gs.playerCastleMaxHp);
+      const prevBestTime = record.bestTime;
+      const prevBestStars = record.bestStars;
+      const isNewTime = prevBestTime == null || gs.time < prevBestTime;
+      const isNewStars = stars > prevBestStars;
+
+      if (isNewTime) record.bestTime = gs.time;
+      if (isNewStars) record.bestStars = stars;
+      if (castleHpPct > record.bestCastleHpPct) {
+        record.bestCastleHpPct = castleHpPct;
+      }
+
+      if (!save.cleared.includes(levelId)) save.cleared.push(levelId);
+      save.maxLevel = Math.max(save.maxLevel, Math.min(levelId + 1, LEVELS.length));
+      persistSave(save);
+
+      return {
+        stars,
+        castleHpPct,
+        time: gs.time,
+        isNewTime,
+        isNewStars,
+        isNewRecord: isNewTime || isNewStars
+      };
+    }
+
+    record.losses += 1;
+    save.stats.totalLosses += 1;
+    persistSave(save);
+    return null;
+  }
+
   // --- DOM ---
   const screens = {
     menu: document.getElementById('menu-screen'),
     level: document.getElementById('level-screen'),
+    records: document.getElementById('records-screen'),
     game: document.getElementById('game-screen')
   };
   const canvas = document.getElementById('game-canvas');
@@ -78,11 +194,18 @@
       btn.className = 'level-btn';
       const locked = lv.id > save.maxLevel;
       const cleared = save.cleared.includes(lv.id);
+      const record = getLevelRecord(save, lv.id);
       if (locked) btn.classList.add('locked');
       if (cleared) btn.classList.add('cleared');
-      btn.innerHTML = `<span>${lv.id}</span>${cleared ? '<span class="stars">★</span>' : ''}`;
+      const starDisplay = record.bestStars
+        ? `<span class="stars">${starsText(record.bestStars)}</span>`
+        : (cleared ? '<span class="stars">★</span>' : '');
+      btn.innerHTML = `<span>${lv.id}</span>${starDisplay}`;
       if (!locked) {
-        btn.addEventListener('click', () => startLevel(lv.id));
+        btn.addEventListener('click', () => {
+          Sound.play('click');
+          startLevel(lv.id);
+        });
       }
       grid.appendChild(btn);
     });
@@ -91,11 +214,57 @@
   function updateMenuStats() {
     const save = loadSave();
     document.getElementById('menu-cleared').textContent = `${save.cleared.length} / ${LEVELS.length}`;
+    const attemptsEl = document.getElementById('menu-attempts');
+    if (attemptsEl) attemptsEl.textContent = save.stats.totalAttempts;
     document.title = `城堡大战 - ${LEVELS.length}关挑战`;
     const subtitle = document.querySelector('.subtitle');
     if (subtitle) {
       subtitle.textContent = `征服 ${LEVELS.length} 座敌方城堡，执掌万界轮回！`;
     }
+  }
+
+  function renderRecordsScreen() {
+    const save = loadSave();
+    const summaryEl = document.getElementById('records-summary');
+    const listEl = document.getElementById('records-list');
+    const emptyEl = document.getElementById('records-empty');
+
+    summaryEl.innerHTML = `
+      <div class="summary-item"><span>已通关</span><strong>${save.cleared.length} / ${LEVELS.length}</strong></div>
+      <div class="summary-item"><span>总挑战</span><strong>${save.stats.totalAttempts} 次</strong></div>
+      <div class="summary-item"><span>胜利 / 失败</span><strong>${save.stats.totalWins} / ${save.stats.totalLosses}</strong></div>
+      <div class="summary-item"><span>累计用时</span><strong>${formatTime(save.stats.totalPlayTime)}</strong></div>
+    `;
+
+    const played = LEVELS
+      .map((lv) => ({ level: lv, record: getLevelRecord(save, lv.id) }))
+      .filter(({ record }) => record.attempts > 0)
+      .sort((a, b) => b.record.lastPlayed - a.record.lastPlayed);
+
+    listEl.innerHTML = '';
+    if (played.length === 0) {
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+
+    emptyEl.classList.add('hidden');
+    played.forEach(({ level, record }) => {
+      const row = document.createElement('div');
+      row.className = 'record-row';
+      const cleared = save.cleared.includes(level.id);
+      row.innerHTML = `
+        <div class="record-main">
+          <span class="record-level">第 ${level.id} 关</span>
+          <span class="record-name">${level.name}</span>
+        </div>
+        <div class="record-meta">
+          <span class="record-stars ${record.bestStars ? 'has-stars' : ''}">${starsText(record.bestStars)}</span>
+          <span class="record-time">最佳 ${formatTime(record.bestTime)}</span>
+          <span class="record-attempts">${record.attempts} 次 · ${cleared ? '已通关' : '未通关'}</span>
+        </div>
+      `;
+      listEl.appendChild(row);
+    });
   }
 
   // --- 游戏实体 ---
@@ -153,6 +322,7 @@
     gameState = {
       level,
       gold: level.startGold,
+      goldRate: getPlayerGoldRate(levelId),
       enemyGold: 0,
       playerCastleHp: level.playerCastleHp,
       playerCastleMaxHp: level.playerCastleHp,
@@ -179,8 +349,11 @@
   }
 
   function startLevel(levelId) {
+    Sound.unlock();
     recordLevelVisit(levelId);
+    recordLevelAttempt(levelId);
     showScreen('game');
+    Sound.startBattleMusic();
     initGame(levelId);
     lastTime = performance.now();
     if (animId) cancelAnimationFrame(animId);
@@ -192,16 +365,19 @@
     const def = UNIT_TYPES[type];
     const gs = gameState;
     if (side === 'player') {
+      if (!isUnitUnlocked(type, currentLevel)) return false;
       if (gs.gold < def.cost) return false;
       gs.gold -= def.cost;
       const x = gs.playerCastleX + 50 + Math.random() * 30;
       gs.units.push(createUnit(type, 'player', x, gs.groundY));
       document.getElementById('gold').textContent = Math.floor(gs.gold);
       updateUnitButtons();
+      Sound.playSpawn(type);
       return true;
     } else {
       const x = gs.enemyCastleX - 50 - Math.random() * 30;
       gs.units.push(createUnit(type, 'enemy', x, gs.groundY));
+      Sound.playSpawn(type);
       return true;
     }
   }
@@ -244,6 +420,7 @@
         gs.playerCastleHp = Math.max(0, gs.playerCastleHp - damage);
       }
       addEffect(target.x, target.y - 30, 'hit');
+      Sound.play('castle_hit');
       updateHpBars();
       checkGameOver();
       return;
@@ -254,6 +431,7 @@
     if (target.hp <= 0) {
       target.alive = false;
       addEffect(target.x, target.y - target.size, 'death');
+      Sound.play('death');
     }
   }
 
@@ -286,8 +464,10 @@
       } else if (unit.attackCooldown <= 0) {
         if (unit.projectile) {
           gs.projectiles.push(createProjectile(unit, target, unit.attack, unit.aoe));
+          Sound.playAttack(unit);
         } else {
           dealDamage(target, unit.attack, unit);
+          Sound.playAttack(unit);
         }
         unit.attackCooldown = 1 / unit.attackSpeed;
       }
@@ -324,6 +504,7 @@
           }
         }
         addEffect(p.targetX, p.targetY, 'explosion');
+        Sound.play('explosion');
       } else {
         const ratio = moveDist / totalDist;
         p.x += dx * ratio;
@@ -367,7 +548,7 @@
     gs.goldTimer += dt * 1000;
     if (gs.goldTimer >= 1000) {
       gs.goldTimer = 0;
-      gs.gold += PLAYER_GOLD_RATE;
+      gs.gold += gs.goldRate;
       document.getElementById('gold').textContent = Math.floor(gs.gold);
       updateUnitButtons();
     }
@@ -380,11 +561,12 @@
     if (gs.enemyCastleHp <= 0) {
       gs.gameOver = true;
       gs.won = true;
-      saveProgress(currentLevel);
-      showResult(true);
+      const result = recordLevelResult(currentLevel, true, gs);
+      showResult(true, result);
     } else if (gs.playerCastleHp <= 0) {
       gs.gameOver = true;
       gs.won = false;
+      recordLevelResult(currentLevel, false, gs);
       showResult(false);
     }
   }
@@ -405,6 +587,9 @@
     const gs = gameState;
     document.querySelectorAll('.unit-btn').forEach(btn => {
       const type = btn.dataset.unit;
+      const unlocked = isUnitUnlocked(type, currentLevel);
+      btn.classList.toggle('hidden', !unlocked);
+      if (!unlocked) return;
       const cost = UNIT_TYPES[type].cost;
       btn.disabled = gs.gold < cost;
     });
@@ -637,11 +822,14 @@
   }
 
   // --- 结果弹窗 ---
-  function showResult(won) {
+  function showResult(won, runResult) {
+    Sound.stopBattleMusic();
     const overlay = document.getElementById('result-overlay');
     const title = document.getElementById('result-title');
     const msg = document.getElementById('result-message');
     const nextBtn = document.getElementById('btn-next-level');
+    const statsEl = document.getElementById('result-stats');
+    const badgeEl = document.getElementById('result-record-badge');
 
     if (won) {
       title.textContent = '🎉 胜利！';
@@ -650,16 +838,59 @@
       if (currentLevel === LEVELS.length) {
         msg.textContent = `恭喜！你征服了全部${LEVELS.length}座城堡，执掌万界轮回！`;
       }
+      if (runResult) {
+        statsEl.classList.remove('hidden');
+        document.getElementById('result-time').textContent = formatTime(runResult.time);
+        document.getElementById('result-hp').textContent =
+          `${Math.floor(runResult.castleHpPct * 100)}%`;
+        document.getElementById('result-stars').textContent = starsText(runResult.stars);
+        if (runResult.isNewRecord) {
+          badgeEl.classList.remove('hidden');
+          badgeEl.textContent = runResult.isNewTime && runResult.isNewStars
+            ? '🏆 新纪录！最快用时 & 最高评级'
+            : runResult.isNewTime
+              ? '🏆 新纪录！最快用时'
+              : '🏆 新纪录！最高评级';
+        } else {
+          badgeEl.classList.add('hidden');
+        }
+      }
+      Sound.play('win');
     } else {
       title.textContent = '💀 战败';
       msg.textContent = '你的城堡被攻陷了，整顿军队再来挑战！';
       nextBtn.style.display = 'none';
+      statsEl.classList.add('hidden');
+      badgeEl.classList.add('hidden');
+      Sound.play('lose');
     }
 
     overlay.classList.remove('hidden');
   }
 
   // --- 事件绑定 ---
+  function bindClickSound(el) {
+    el.addEventListener('click', () => Sound.play('click'));
+  }
+
+  [
+    'btn-start',
+    'btn-level-select',
+    'btn-records',
+    'btn-back-menu',
+    'btn-back-from-records',
+    'btn-pause',
+    'btn-resume',
+    'btn-quit',
+    'btn-pause-quit',
+    'btn-next-level',
+    'btn-retry',
+    'btn-result-menu'
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) bindClickSound(el);
+  });
+
   document.getElementById('btn-start').addEventListener('click', () => {
     const save = loadSave();
     startLevel(save.maxLevel);
@@ -668,6 +899,16 @@
   document.getElementById('btn-level-select').addEventListener('click', () => {
     renderLevelGrid();
     showScreen('level');
+  });
+
+  document.getElementById('btn-records').addEventListener('click', () => {
+    renderRecordsScreen();
+    showScreen('records');
+  });
+
+  document.getElementById('btn-back-from-records').addEventListener('click', () => {
+    showScreen('menu');
+    updateMenuStats();
   });
 
   document.getElementById('btn-back-menu').addEventListener('click', () => {
@@ -684,15 +925,18 @@
 
   document.getElementById('btn-pause').addEventListener('click', () => {
     paused = true;
+    Sound.setBattleMusicPaused(true);
     document.getElementById('pause-overlay').classList.remove('hidden');
   });
 
   document.getElementById('btn-resume').addEventListener('click', () => {
     paused = false;
+    Sound.setBattleMusicPaused(false);
     document.getElementById('pause-overlay').classList.add('hidden');
   });
 
   function exitToMenu() {
+    Sound.stopBattleMusic();
     recordLevelVisit(currentLevel);
     if (animId) cancelAnimationFrame(animId);
     showScreen('menu');
@@ -739,10 +983,11 @@
   // 快捷键
   window.addEventListener('keydown', (e) => {
     if (!gameState || gameState.gameOver || paused) return;
-    const keys = { '1': 'warrior', '2': 'archer', '3': 'knight', '4': 'catapult', '5': 'mage' };
+    const keys = { '1': 'warrior', '2': 'archer', '3': 'knight', '4': 'catapult', '5': 'mage', '6': 'speedCatapult', '7': 'holyKnight' };
     if (keys[e.key]) spawnUnit(keys[e.key], 'player');
     if (e.key === 'Escape') {
       paused = !paused;
+      Sound.setBattleMusicPaused(paused);
       document.getElementById('pause-overlay').classList.toggle('hidden', !paused);
     }
   });
