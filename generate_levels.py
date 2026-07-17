@@ -133,7 +133,10 @@ def get_stats(level_id):
 
     start_gold = 5
 
-    gold_rate = 35
+    if level_id <= 20:
+        gold_rate = 20
+    else:
+        gold_rate = 20 + ((level_id - 20 - 1) // 15 + 1) * 5
 
     # enemyGoldRate: +1 every 4 levels on average (25 per 100)
     enemy_gold_rate = 260 + delta // 4

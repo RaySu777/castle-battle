@@ -9,6 +9,7 @@
   const SPEED_CATAPULT_UNLOCK = 115;
   const HOLY_KNIGHT_UNLOCK = 115;
 
+  // 1-20关每秒20金币；20关之后每15关一档，每秒收入+5（21-35关25，36-50关30…）
   function getPlayerGoldRate(levelId) {
     if (levelId <= PLAYER_GOLD_FLAT_UNTIL) return PLAYER_GOLD_BASE;
     const tier = Math.floor((levelId - PLAYER_GOLD_FLAT_UNTIL - 1) / GOLD_BONUS_INTERVAL) + 1;
