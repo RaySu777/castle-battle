@@ -449,9 +449,9 @@ const LEVELS = [
     startGold: 40,
     goldRate: 19,
     enemyGoldRate: 22,
-    enemyUnits: ['catapult', 'catapult', 'mage', 'mage', 'knight', 'knight'],
+    enemyUnits: ['catapult', 'catapult', 'mage', 'mage', 'knight', 'holyKnight', 'speedCatapult'],
     enemySpawnInterval: 1500,
-    description: '万王之王倒下，传说之路才刚刚开启……'
+    description: '万王之王麾下圣骑士与速度投石机登场，传说之路才刚刚开启……'
   },
   {
     id: 31,
@@ -1471,7 +1471,7 @@ const LEVELS = [
     enemyGoldRate: 63,
     enemyUnits: ['archer', 'archer', 'knight', 'holyKnight', 'mage', 'catapult', 'speedCatapult'],
     enemySpawnInterval: 892,
-    description: '生死簿堂圣骑士与速度投石机登场，需快速撕开缺口。'
+    description: '生死簿堂精锐尽出，圣骑士与速度投石机压阵，需快速撕开缺口。'
   },
   {
     id: 116,
