@@ -83,6 +83,9 @@ UNIT_TEMPLATES = [
     "['knight', 'knight', 'mage', 'catapult', 'archer']",
     "['mage', 'mage', 'catapult', 'knight', 'archer']",
     "['knight', 'knight', 'knight', 'catapult', 'mage']",
+    "['holyKnight', 'knight', 'mage', 'catapult', 'speedCatapult', 'archer']",
+    "['speedCatapult', 'catapult', 'holyKnight', 'mage', 'knight', 'archer']",
+    "['holyKnight', 'holyKnight', 'speedCatapult', 'catapult', 'mage', 'mage']",
 ]
 
 

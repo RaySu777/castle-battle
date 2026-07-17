@@ -51,7 +51,7 @@ const UNIT_TYPES = {
     siege: true
   },
   speedCatapult: {
-    name: '速度投石车',
+    name: '速度投石机',
     cost: 150,
     hp: 90,
     attack: 55,
@@ -1471,7 +1471,7 @@ const LEVELS = [
     enemyGoldRate: 63,
     enemyUnits: ['archer', 'archer', 'knight', 'holyKnight', 'mage', 'catapult', 'speedCatapult'],
     enemySpawnInterval: 892,
-    description: '生死簿堂圣骑士与速度投石车登场，需快速撕开缺口。'
+    description: '生死簿堂圣骑士与速度投石机登场，需快速撕开缺口。'
   },
   {
     id: 116,
