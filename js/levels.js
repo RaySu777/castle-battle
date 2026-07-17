@@ -449,9 +449,9 @@ const LEVELS = [
     startGold: 40,
     goldRate: 19,
     enemyGoldRate: 22,
-    enemyUnits: ['catapult', 'catapult', 'mage', 'mage', 'knight', 'holyKnight', 'speedCatapult'],
+    enemyUnits: ['catapult', 'catapult', 'mage', 'mage', 'knight', 'knight'],
     enemySpawnInterval: 1500,
-    description: '万王之王麾下圣骑士与速度投石机登场，传说之路才刚刚开启……'
+    description: '万王之王倒下，传说之路才刚刚开启……'
   },
   {
     id: 31,
@@ -569,9 +569,9 @@ const LEVELS = [
     startGold: 34,
     goldRate: 21,
     enemyGoldRate: 27,
-    enemyUnits: ['catapult', 'catapult', 'mage', 'knight', 'knight'],
+    enemyUnits: ['catapult', 'catapult', 'mage', 'knight', 'knight', 'holyKnight', 'speedCatapult'],
     enemySpawnInterval: 1300,
-    description: '半程关卡！半神之门后，敌人已进入神域级别。'
+    description: '半神之门开启，圣骑士与速度投石机登场，敌人已进入神域级别。'
   },
   {
     id: 41,
@@ -629,9 +629,9 @@ const LEVELS = [
     startGold: 31,
     goldRate: 22,
     enemyGoldRate: 29,
-    enemyUnits: ['mage', 'catapult', 'knight', 'knight', 'mage', 'archer'],
+    enemyUnits: ['mage', 'catapult', 'knight', 'knight', 'mage', 'holyKnight', 'speedCatapult'],
     enemySpawnInterval: 1210,
-    description: '灭世祭坛激活，敌军进入狂暴状态。'
+    description: '灭世祭坛激活，圣骑士与速度投石机压阵，敌军进入狂暴状态。'
   },
   {
     id: 46,

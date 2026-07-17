@@ -6,8 +6,10 @@
   const GOLD_BONUS_STEP = 5;
   const GOLD_BONUS_INTERVAL = 15;
   const PLAYER_GOLD_FLAT_UNTIL = 20;
-  const SPEED_CATAPULT_UNLOCK = 30;
-  const HOLY_KNIGHT_UNLOCK = 30;
+  const SPEED_CATAPULT_UNLOCK = 40;
+  const HOLY_KNIGHT_UNLOCK = 40;
+  const ENEMY_ADVANCED_UNITS_LEVEL = 45;
+  const ENEMY_ADVANCED_UNITS = ['holyKnight', 'speedCatapult'];
 
   // 1-20关每秒20金币；20关之后每15关一档，每秒收入+5（21-35关25，36-50关30…）
   function getPlayerGoldRate(levelId) {
@@ -20,6 +22,16 @@
     if (type === 'speedCatapult') return levelId >= SPEED_CATAPULT_UNLOCK;
     if (type === 'holyKnight') return levelId >= HOLY_KNIGHT_UNLOCK;
     return true;
+  }
+
+  function getEnemyUnitPool(level) {
+    const units = level.enemyUnits.slice();
+    if (level.id >= ENEMY_ADVANCED_UNITS_LEVEL) {
+      for (const type of ENEMY_ADVANCED_UNITS) {
+        if (!units.includes(type)) units.push(type);
+      }
+    }
+    return units;
   }
 
   // --- 存档 ---
@@ -533,7 +545,7 @@
     gs.enemySpawnTimer += dt * 1000;
     if (gs.enemySpawnTimer >= gs.level.enemySpawnInterval) {
       gs.enemySpawnTimer = 0;
-      const unitTypes = gs.level.enemyUnits;
+      const unitTypes = getEnemyUnitPool(gs.level);
       const type = unitTypes[gs.enemyUnitIndex % unitTypes.length];
       const cost = UNIT_TYPES[type].cost;
       if (gs.enemyGold >= cost) {
