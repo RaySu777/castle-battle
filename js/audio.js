@@ -256,8 +256,11 @@
     }
   }
 
+  const COMBAT_SOUNDS = new Set(['castle_hit', 'death', 'explosion', 'melee', 'shoot']);
+
   function play(name) {
     if (!unlocked) return;
+    if (COMBAT_SOUNDS.has(name)) return;
     if (!ensureContext()) return;
 
     if (name === 'win') {
@@ -276,25 +279,7 @@
     playSynth('spawn');
   }
 
-  function playAttack(unit) {
-    if (!unit) return;
-    if (!unlocked) return;
-    if (!ensureContext()) return;
-
-    if (unit.projectile) {
-      if (unit.siege || unit.type === 'mage') {
-        if (playBuffer('catapult')) return;
-      } else if (unit.type === 'archer') {
-        if (playBuffer('archer_shoot')) return;
-      } else if (playBuffer('shoot')) {
-        return;
-      }
-      playSynth('shoot');
-      return;
-    }
-
-    playSynth('melee');
-  }
+  function playAttack() {}
 
   function startBattleMusic() {
     if (!unlocked) return;
